@@ -1,0 +1,31 @@
+{
+    "name": "Creative",
+    "slug": "creative",
+    "version": "1.0.0",
+    "description": "Bold, vibrant colors for portfolios and creative studios",
+    "author": "TallCMS",
+    "daisyui": {
+        "preset": "synthwave"
+    },
+    "supports": {
+        "dark_mode": false,
+        "theme_controller": false
+    },
+    "screenshots": {
+        "primary": "screenshot.png"
+    },
+    "build": {
+        "entries": [
+            "resources/css/app.css",
+            "resources/js/app.js"
+        ]
+    },
+    "templates": {
+        "example": {
+            "label": "Example Template",
+            "description": "A custom example template for this theme",
+            "has_sidebar": false,
+            "minimal_chrome": false
+        }
+    }
+}

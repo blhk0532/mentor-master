@@ -1,0 +1,32 @@
+{
+    "name": "anish/text-input-entry",
+    "description": "A Filament plugin for editable text input entries in infolists",
+    "type": "library",
+    "license": "MIT",
+    "version": "1.0.0",
+    "autoload": {
+        "psr-4": {
+            "Anish\\TextInputEntry\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "anishregmi17",
+            "email": "anishregminaglibang@gmail.com"
+        }
+    ],
+    "minimum-stability": "dev",
+    "prefer-stable": true,
+    "require": {
+        "php": "^8.1",
+        "filament/support": "^3.0|^4.0|^5.0",
+        "spatie/laravel-package-tools": "^1.16"
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Anish\\TextInputEntry\\TextInputEntryServiceProvider"
+            ]
+        }
+    }
+}

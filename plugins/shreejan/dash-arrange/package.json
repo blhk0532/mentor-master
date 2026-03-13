@@ -1,0 +1,25 @@
+{
+    "name": "dash-arrange",
+    "version": "1.0.0",
+    "description": "A Filament plugin for customizable dashboard widgets with drag & drop functionality",
+    "homepage": "https://github.com/shreejanpandit/arragne-dashboard#readme",
+    "bugs": {
+        "url": "https://github.com/shreejanpandit/arragne-dashboard/issues"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/shreejanpandit/arragne-dashboard.git"
+    },
+    "license": "ISC",
+    "author": "",
+    "type": "commonjs",
+    "main": "index.js",
+    "scripts": {
+        "build": "npx @tailwindcss/cli -i ./resources/css/dashboard-customization.css -o ./resources/dist/css/dashboard-customization.css --build --minify && php ../../../artisan filament:assets",
+        "dev": "npx @tailwindcss/cli -i ./resources/css/dashboard-customization.css -o ./resources/dist/css/dashboard-customization.css --watch --minify"
+    },
+    "dependencies": {
+        "@tailwindcss/cli": "^4.1.17",
+        "tailwindcss": "^4.1.17"
+    }
+}

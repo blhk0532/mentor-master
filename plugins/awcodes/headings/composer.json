@@ -1,0 +1,16 @@
+{
+    "name": "awcodes/headings",
+    "description": "A Filament plugin for headings",
+    "autoload": {
+        "psr-4": {
+            "Awcodes\\Headings\\": "src/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Awcodes\\Headings\\HeadingsServiceProvider"
+            ]
+        }
+    }
+}

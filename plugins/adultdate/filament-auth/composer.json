@@ -1,0 +1,66 @@
+{
+    "name": "adultdate/filament-auth",
+    "description": "adultdate filament-auth",
+    "keywords": [
+        "adultdate",
+        "laravel",
+        "filament",
+        "filament-auth"
+    ],
+    "homepage": "https://github.com/adultdate/filament-auth",
+    "support": {
+        "issues": "https://github.com/adultdate/filament-auth/issues",
+        "source": "https://github.com/adultdate/filament-auth"
+    },
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "adultdate",
+            "email": "adultdate@example.com",
+            "role": "Developer"
+        }
+    ],
+    "require": {
+        "php": "^8.3",
+        "filament/filament": "^5.0"
+    },
+    "require-dev": {
+    },
+    "autoload": {
+        "psr-4": {
+            "Adultdate\\FilamentAuth\\": "src/",
+            "Adultdate\\FilamentAuth\\Database\\Factories\\": "database/factories/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Adultdate\\FilamentAuth\\Tests\\": "tests/"
+        }
+    },
+    "scripts": {
+        "post-autoload-dump": "@php ./vendor/bin/testbench package:discover --ansi",
+        "analyse": "vendor/bin/phpstan analyse",
+        "test": "vendor/bin/pest",
+        "test-coverage": "vendor/bin/pest --coverage",
+        "format": "vendor/bin/pint"
+    },
+    "config": {
+        "sort-packages": true,
+        "allow-plugins": {
+            "pestphp/pest-plugin": true,
+            "phpstan/extension-installer": true
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Adultdate\\FilamentAuth\\FilamentAuthServiceProvider"
+            ],
+            "aliases": {
+                "FilamentAuth": "Adultdate\\FilamentAuth\\Facades\\FilamentAuth"
+            }
+        }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
+}

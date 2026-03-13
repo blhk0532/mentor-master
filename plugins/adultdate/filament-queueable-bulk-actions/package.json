@@ -1,0 +1,20 @@
+{
+    "private": true,
+    "type": "module",
+    "scripts": {
+        "dev:styles": "npx @tailwindcss/cli -i resources/css/index.css -o resources/dist/queueable-bulk-actions.css --watch",
+        "dev:scripts": "node bin/build.js --dev",
+        "build:styles": "npx @tailwindcss/cli -i resources/css/index.css -o resources/dist/queueable-bulk-actions.css --minify",
+        "build:scripts": "node bin/build.js"
+    },
+    "devDependencies": {
+        "autoprefixer": "^10.4.14",
+        "esbuild": "^0.19.2",
+        "prettier": "^3.0",
+        "prettier-plugin-tailwindcss": "^0.7",
+        "tailwindcss": "^4.1.16"
+    },
+    "dependencies": {
+        "@tailwindcss/cli": "^4.1.16"
+    }
+}

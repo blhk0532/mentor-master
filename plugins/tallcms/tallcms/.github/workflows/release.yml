@@ -1,0 +1,214 @@
+name: Build Release Package
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: mbstring, xml, ctype, json, bcmath, curl, zip, gd, sqlite3, sodium
+          coverage: none
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Get Composer cache directory
+        id: composer-cache
+        run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
+
+      - name: Cache Composer dependencies
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: ${{ runner.os }}-composer-
+
+      - name: Install Composer dependencies (production)
+        run: composer install --no-dev --optimize-autoloader --no-interaction --prefer-dist
+
+      - name: Setup Laravel environment
+        run: |
+          cp .env.example .env
+          php artisan key:generate
+
+      - name: Install NPM dependencies
+        run: npm ci
+
+      - name: Build frontend assets
+        run: npm run build
+
+      - name: Build talldaisy theme
+        working-directory: themes/talldaisy
+        run: |
+          npm install
+          npm run build
+
+      - name: Build tallcms/cms package assets
+        working-directory: packages/tallcms/cms
+        run: |
+          npm install
+          npm run build
+
+      - name: Get version from tag
+        id: version
+        run: echo "version=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+
+      - name: Create release marker
+        run: |
+          cat > .tallcms-release << EOF
+          {
+              "product": "tallcms",
+              "version": "${{ steps.version.outputs.version }}",
+              "type": "full",
+              "min_php": "8.2",
+              "required_extensions": ["pdo", "mbstring", "openssl", "fileinfo"],
+              "build_platform": "Linux",
+              "build_php": "8.3",
+              "built_at": "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          }
+          EOF
+
+      - name: Prepare release directory
+        run: |
+          mkdir -p release
+
+          # Copy all files except excluded ones
+          rsync -av --progress . release/ \
+            --exclude='.git' \
+            --exclude='.github' \
+            --exclude='release' \
+            --exclude='tests' \
+            --exclude='.env' \
+            --exclude='.env.backup' \
+            --exclude='.env.local' \
+            --exclude='.env.production' \
+            --exclude='phpunit.xml' \
+            --exclude='.phpunit.cache' \
+            --exclude='storage/logs/*.log' \
+            --exclude='storage/framework/cache/data/*' \
+            --exclude='storage/framework/sessions/*' \
+            --exclude='storage/framework/views/*' \
+            --exclude='*.zip' \
+            --exclude='.DS_Store' \
+            --exclude='Thumbs.db' \
+            --exclude='node_modules' \
+            --exclude='packages/tallcms/cms/node_modules' \
+            --exclude='packages/tallcms/cms/vendor' \
+            --exclude='packages/tallcms/cms/.phpunit.cache'
+
+      - name: Create empty directories and placeholder files
+        run: |
+          cd release
+
+          # Ensure storage directories exist with .gitkeep
+          mkdir -p storage/app/public
+          mkdir -p storage/app/tallcms-backups/quarantine
+          mkdir -p storage/app/tallcms-backups/files
+          mkdir -p storage/app/tallcms-backups/db
+          mkdir -p storage/framework/cache/data
+          mkdir -p storage/framework/sessions
+          mkdir -p storage/framework/views
+          mkdir -p storage/logs
+          mkdir -p bootstrap/cache
+
+          touch storage/app/.gitkeep
+          touch storage/app/public/.gitkeep
+          touch storage/app/tallcms-backups/.gitkeep
+          touch storage/app/tallcms-backups/quarantine/.gitkeep
+          touch storage/app/tallcms-backups/files/.gitkeep
+          touch storage/app/tallcms-backups/db/.gitkeep
+          touch storage/framework/.gitkeep
+          touch storage/framework/cache/.gitkeep
+          touch storage/framework/cache/data/.gitkeep
+          touch storage/framework/sessions/.gitkeep
+          touch storage/framework/views/.gitkeep
+          touch storage/logs/.gitkeep
+          touch bootstrap/cache/.gitkeep
+
+      - name: Clean up release directory
+        run: |
+          cd release
+          # Remove path repository reference from composer.json (not needed for end users)
+          jq 'del(.repositories)' composer.json > composer.json.tmp
+          mv composer.json.tmp composer.json
+          # Remove composer.lock (contains local path references)
+          rm -f composer.lock
+
+      - name: Create ZIP archive
+        run: |
+          cd release
+          zip -r ../tallcms-${{ steps.version.outputs.version }}.zip . -x ".env" -x ".env.*"
+
+      - name: Setup release environment for manifest generation
+        run: |
+          cd release
+          cp .env.example .env
+          # Create installer.lock to bypass installer redirect in CLI mode
+          # This is only for running artisan commands - it's not in the ZIP
+          touch installer.lock
+          php artisan key:generate --force
+
+      - name: Fix vendor symlink and regenerate autoload
+        run: |
+          cd release
+
+          echo "=== Fix symlink: replace with actual files ==="
+          if [ -L vendor/tallcms/cms ]; then
+            echo "Found symlink, replacing with actual files..."
+            rm vendor/tallcms/cms
+            cp -r packages/tallcms/cms vendor/tallcms/cms
+            echo "Symlink replaced with directory copy"
+          fi
+
+          echo "=== Regenerate autoloader ==="
+          composer dump-autoload --optimize --no-scripts
+
+      - name: Generate checksums manifest
+        run: |
+          cd release
+          echo "Testing artisan..."
+          php artisan --version
+          echo "Generating manifest..."
+          php artisan tallcms:generate-manifest --output=../checksums.json
+          cd ..
+          echo "Adding ZIP hash to manifest..."
+          ZIP_HASH=$(sha256sum tallcms-${{ steps.version.outputs.version }}.zip | cut -d' ' -f1)
+          jq --arg hash "$ZIP_HASH" '.zip_sha256 = $hash' checksums.json > checksums.tmp && mv checksums.tmp checksums.json
+          echo "Manifest complete."
+
+      - name: Sign checksums with Ed25519
+        run: |
+          if [ -z "$ED25519_PRIVATE_KEY" ]; then
+            echo "::error::ED25519_PRIVATE_KEY secret is not set. Release signing is required."
+            exit 1
+          fi
+          cd release
+          php artisan tallcms:sign-release ../checksums.json
+        env:
+          ED25519_PRIVATE_KEY: ${{ secrets.ED25519_PRIVATE_KEY }}
+
+      - name: Upload release assets
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            tallcms-${{ steps.version.outputs.version }}.zip
+            checksums.json
+            checksums.json.sig
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

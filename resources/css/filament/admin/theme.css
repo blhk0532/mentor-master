@@ -1,0 +1,37 @@
+@import '../../../../vendor/filament/filament/resources/css/theme.css';
+
+@source '../../../../app/Filament/**/*';
+@source '../../../../resources/views/filament/**/*';
+
+.sok-adress{
+        height: 36px;
+    padding-right: 100px;
+    margin-right: 100px;
+}
+
+.sok-adress .fi-input-wrp-content-ctn{
+        height: 36px;
+    position: absolute;
+    margin-right: 100px;
+    padding-right: 100px;
+}
+.fi-header.fi-header-has-breadcrumbs{
+    display:none!important;
+}
+
+#spara-map-pin-button{
+        position: absolute;
+    top: -60px;
+    right: 2px;
+}
+
+.fi-header-heading{
+     display:none!important;
+}
+h1.fi-header-heading{
+    display:none;
+}
+
+.fi-page-header-main-ctn{
+    padding:0px;
+}

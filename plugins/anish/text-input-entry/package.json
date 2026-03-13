@@ -1,0 +1,15 @@
+{
+    "name": "text-input-entry",
+    "version": "1.0.0",
+    "description": "A Filament plugin for editable text input entries in infolists",
+    "main": "dist/text-input-entry.js",
+    "scripts": {
+        "build": "node build.js",
+        "dev": "node build.js --watch"
+    },
+    "author": "anishregmi17",
+    "license": "MIT",
+    "devDependencies": {
+        "esbuild": "^0.19.0"
+    }
+}

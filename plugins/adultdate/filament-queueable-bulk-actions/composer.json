@@ -1,0 +1,79 @@
+{
+    "name": "adultdate/filament-queueable-bulk-actions",
+    "description": "This Filament plugin simplifies managing bulk operations asynchronously in a queue. It provides tracking and status updates for tasks, while supporting both action calls and job dispatches. Excellent for bulk data updates and tasks with Filament & Livewire support for real-time notifications.",
+    "keywords": [
+        "adultdate",
+        "laravel",
+        "filament",
+        "queueable-bulk-actions"
+    ],
+    "homepage": "https://github.com/adultdate/queueable-bulk-actions",
+    "support": {
+        "issues": "https://github.com/adultdate/queueable-bulk-actions/issues",
+        "source": "https://github.com/adultdate/queueable-bulk-actions"
+    },
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "adultdate",
+            "email": "adultdate@gmail.com",
+            "role": "Developer"
+        }
+    ],
+    "require": {
+        "php": "^8.2",
+        "filament/filament": "^5.0",
+        "filament/tables": "^5.0",
+        "spatie/laravel-package-tools": "^1.15.0"
+    },
+    "require-dev": {
+        "laravel/pint": "^1.0",
+        "nunomaduro/collision": "^8.0",
+        "nunomaduro/larastan": "^3.0",
+        "orchestra/testbench": "^10.0",
+        "pestphp/pest": "^4.1",
+        "pestphp/pest-plugin-arch": "^4.0",
+        "pestphp/pest-plugin-laravel": "^4.0",
+        "phpstan/extension-installer": "^1.0",
+        "phpstan/phpstan-deprecation-rules": "^2.0",
+        "phpstan/phpstan-phpunit": "2.0",
+        "spatie/laravel-ray": "^1.26"
+    },
+    "autoload": {
+        "psr-4": {
+            "Bytexr\\QueueableBulkActions\\": "src/",
+            "Bytexr\\QueueableBulkActions\\Database\\Factories\\": "database/factories/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Bytexr\\QueueableBulkActions\\Tests\\": "tests/"
+        }
+    },
+    "scripts": {
+        "post-autoload-dump": "@php ./vendor/bin/testbench package:discover --ansi",
+        "analyse": "vendor/bin/phpstan analyse",
+        "test": "vendor/bin/pest",
+        "test-coverage": "vendor/bin/pest --coverage",
+        "format": "vendor/bin/pint"
+    },
+    "config": {
+        "sort-packages": true,
+        "allow-plugins": {
+            "pestphp/pest-plugin": true,
+            "phpstan/extension-installer": true
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Bytexr\\QueueableBulkActions\\QueueableBulkActionsServiceProvider"
+            ],
+            "aliases": {
+                "QueueableBulkActions": "Bytexr\\QueueableBulkActions\\Facades\\QueueableBulkActions"
+            }
+        }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
+}

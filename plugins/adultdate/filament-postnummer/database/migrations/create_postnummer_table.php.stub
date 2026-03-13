@@ -1,0 +1,67 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::create('postnummer', function (Blueprint $table) {
+            $table->string('id')->primary();
+            $table->string('post_nummer');
+            $table->string('post_ort');
+            $table->string('post_lan');
+            $table->integer('merinfo_personer_total')->nullable()->default(null);
+            $table->integer('merinfo_personer_phone_total')->nullable()->default(null);
+            $table->integer('merinfo_personer_house_total')->nullable()->default(null);
+            $table->integer('merinfo_foretag_total')->nullable()->default(null);
+            $table->integer('merinfo_foretag_phone_total')->nullable()->default(null);
+            $table->integer('merinfo_personer_saved')->nullable()->default(null);
+            $table->integer('merinfo_personer_phone_saved')->nullable()->default(null);
+            $table->integer('merinfo_personer_house_saved')->nullable()->default(null);
+            $table->integer('merinfo_foretag_saved')->nullable()->default(null);
+            $table->integer('merinfo_foretag_phone_saved')->nullable()->default(null);
+            $table->integer('hitta_personer_total')->nullable()->default(null);
+            $table->integer('hitta_foretag_total')->nullable()->default(null);
+            $table->integer('hitta_personer_saved')->nullable()->default(null);
+            $table->integer('hitta_personer_phone_saved')->nullable()->default(null);
+            $table->integer('hitta_personer_house_saved')->nullable()->default(null);
+            $table->integer('hitta_foretag_saved')->nullable()->default(null);
+            $table->integer('ratsit_personer_total')->nullable()->default(null);
+            $table->integer('ratsit_foretag_total')->nullable()->default(null);
+            $table->integer('ratsit_personer_saved')->nullable()->default(null);
+            $table->integer('ratsit_foretag_saved')->nullable()->default(null);
+            $table->integer('ratsit_personer_phone_saved')->nullable()->default(null);
+            $table->integer('ratsit_personer_house_saved')->nullable()->default(null);
+            $table->string('status')->nullable()->default('idle');
+            $table->boolean('is_active')->default(true);
+            $table->boolean('is_personer_active')->default(true);
+            $table->boolean('is_foretag_active')->default(true);
+            $table->boolean('merinfo_personer_queue')->default(false);
+            $table->boolean('merinfo_foretag_queue')->default(false);
+            $table->boolean('merinfo_personer_count')->default(false);
+            $table->boolean('merinfo_foretag_count')->default(false);
+            $table->boolean('hitta_personer_queue')->default(false);
+            $table->boolean('hitta_foretag_queue')->default(false);
+            $table->boolean('ratsit_personer_queue')->default(false);
+            $table->boolean('ratsit_foretag_queue')->default(false);
+            $table->timestamps();
+
+            $table->index('post_ort');
+            $table->index('post_nummer');
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::dropIfExists('postnummer');
+    }
+};

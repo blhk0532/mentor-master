@@ -1,0 +1,74 @@
+{
+    "name": "tomatophp/filament-notes",
+    "type": "library",
+    "description": "Add Sticky Notes to your FilamentPHP dashboard with tons of options and style",
+    "keywords": [
+        "php",
+        "laravel",
+        "notes",
+        "filament",
+        "sticky",
+        "widget"
+    ],
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "TomatoPHP\\FilamentNotes\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Tests\\": "tests/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "TomatoPHP\\FilamentNotes\\FilamentNotesServiceProvider"
+            ]
+        }
+    },
+    "authors": [
+        {
+            "name": "Fady Mondy",
+            "email": "info@3x1.io"
+        }
+    ],
+    "require": {
+        "php": "^8.1|^8.2|^8.3|^8.4|^8.5",
+        "tomatophp/console-helpers": "@dev",
+        "tomatophp/filament-icons": "@dev",
+        "filament/filament": "^3.0|^4.0|^5.0",
+        "tomatophp/filament-types": "@dev"
+    },
+    "repositories": [
+        {
+            "type": "path",
+            "url": "plugins/tomatophp/console-helpers",
+            "options": {
+                "symlink": true
+            }
+        },
+        {
+            "type": "path",
+            "url": "plugins/tomatophp/filament-icons",
+            "options": {
+                "symlink": true
+            }
+        },
+        {
+            "type": "path",
+            "url": "plugins/tomatophp/filament-types",
+            "options": {
+                "symlink": true
+            }
+        },
+        {
+            "type": "path",
+            "url": "plugins/tomatophp/filament-translation-component",
+            "options": {
+                "symlink": true
+            }
+        }
+    ]
+}

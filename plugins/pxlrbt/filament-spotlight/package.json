@@ -1,0 +1,13 @@
+{
+    "private": true,
+    "scripts": {
+        "dev": "mix watch",
+        "build": "mix --production"
+    },
+    "devDependencies": {
+        "laravel-mix": "^6.0.6"
+    },
+    "dependencies": {
+        "fuse.js": "^6.5.3"
+    }
+}

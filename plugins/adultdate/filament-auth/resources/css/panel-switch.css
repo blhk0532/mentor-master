@@ -1,0 +1,99 @@
+/* Panel Switch Modal Styles */
+
+.panel-switch-modal .fi-modal-content {
+    align-items: center !important;
+    margin-top: 2rem !important;
+}
+
+/* Grid: cap to max 4 columns and provide responsive fallbacks */
+.panel-switch-grid {
+    --panel-switch-card-min: 10rem;
+    display: grid;
+    /* cap to 4 columns on large screens */
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0.75rem;
+    /* allow grid to take available width but visual max width is controlled on modal */
+    width: 100%;
+    padding-inline: 1rem;
+    box-sizing: border-box;
+    margin-inline: auto;
+}
+
+/* Constrain modal to viewport width so it won't overflow horizontally */
+.panel-switch-modal .fi-modal {
+    max-width: calc(10rem * 4 + 0.5rem * 2 + 3rem) !important;
+    width: min(100%, calc(10rem * 4 + 0.5rem * 2 + 3rem)) !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    box-sizing: border-box;
+}
+
+/* Responsive breakpoints: reduce columns for smaller viewports */
+@media (max-width: 1024px) {
+    .panel-switch-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        max-width: calc(var(--panel-switch-card-min) * 3 + 0.50rem * 2 + 3rem);
+        width: min(100%, calc(var(--panel-switch-card-min) * 3 + 0.50rem * 2 + 3rem));
+    }
+    .panel-switch-modal .fi-modal {
+        max-width: calc(var(--panel-switch-card-min) * 3 + 0.5rem * 2 + 3rem) !important;
+        width: min(100%, calc(var(--panel-switch-card-min) * 3 + 0.5rem * 2 + 3rem)) !important;
+    }
+}
+
+@media (max-width: 768px) {
+    .panel-switch-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        max-width: calc(var(--panel-switch-card-min) * 2 + 0.50rem * 2 + 3rem);
+        width: min(100%, calc(var(--panel-switch-card-min) * 2 + 0.50rem * 2 + 3rem));
+    }
+    .panel-switch-modal .fi-modal {
+        max-width: calc(var(--panel-switch-card-min) * 2 + 0.5rem * 2 + 3rem) !important;
+        width: min(100%, calc(var(--panel-switch-card-min) * 2 + 0.5rem * 2 + 3rem)) !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .panel-switch-grid {
+        grid-template-columns: 1fr;
+        max-width: calc(var(--panel-switch-card-min) * 1 + 0.50rem * 2 + 3rem);
+        width: min(100%, calc(var(--panel-switch-card-min) * 1 + 0.50rem * 2 + 3rem));
+    }
+    .panel-switch-modal .fi-modal {
+        max-width: calc(var(--panel-switch-card-min) * 1 + 0.5rem * 2 + 3rem) !important;
+        width: min(100%, calc(var(--panel-switch-card-min) * 1 + 0.5rem * 2 + 3rem)) !important;
+    }
+}
+
+/* Reduce card padding slightly and ensure box-sizing to avoid overflow */
+.panel-switch-card .panel-switch-card-section {
+    padding: 0.5rem;
+    box-sizing: border-box;
+    overflow: hidden;
+}
+
+/* Responsive images/icons inside cards */
+.panel-switch-card-image,
+.panel-switch-card-icon {
+    max-width: 100%;
+    height: auto;
+    display: block;
+}
+
+svg.text-primary-600.panel-switch-card-icon {
+    width: 55px!important;
+    height: 55px!important;
+}
+
+div.panel-switch-grid {
+    --panel-switch-card-min: 10rem;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0.75rem;
+    width: 100%;
+    padding-inline: 1rem;
+    box-sizing: border-box;
+    margin-inline: auto;
+    top: 100px;
+    position: absolute;
+}

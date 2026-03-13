@@ -1,0 +1,34 @@
+/**
+ * Filament Admin Theme CSS
+ *
+ * This stylesheet is for Filament chrome ONLY.
+ * daisyUI and block styles are in preview.css (loaded separately for block previews).
+ */
+@import '../../../../vendor/filament/filament/resources/css/theme.css';
+@plugin "@tailwindcss/typography";
+
+/* Filament admin component sources */
+@source '../../../../app/Filament/**/*';
+@source '../../../../resources/views/filament/**/*';
+
+/**
+ * RichEditor Sticky Blocks Panel
+ *
+ * Makes the custom blocks panel sticky so it stays visible when scrolling
+ * through long content in the editor.
+ */
+.fi-fo-rich-editor {
+    /* Make the main container a positioned context for sticky */
+    & .fi-fo-rich-editor-main {
+        position: relative;
+    }
+
+    /* Make panels sticky with a max height and scroll */
+    & .fi-fo-rich-editor-panels {
+        position: sticky;
+        top: 0;
+        max-height: 100vh;
+        overflow-y: auto;
+        align-self: flex-start;
+    }
+}

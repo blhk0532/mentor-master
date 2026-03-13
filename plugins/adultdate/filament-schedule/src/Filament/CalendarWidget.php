@@ -1,0 +1,25 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Adultdate\Schedule\Filament;
+
+use Adultdate\Schedule\Concerns\InteractsWithCalendar;
+use Adultdate\Schedule\Contracts\HasCalendar;
+use Filament\Actions\Contracts\HasActions;
+use Filament\Schemas\Contracts\HasSchemas;
+use Filament\Widgets\Widget;
+
+abstract class CalendarWidget extends Widget implements HasActions, HasCalendar, HasSchemas
+{
+    use InteractsWithCalendar;
+
+    protected string $view = 'adultdate-schedule::calendar-widget';
+
+    protected int|string|array $columnSpan = 'full';
+
+    final public function eventAssetUrl(): string
+    {
+        return \Filament\Support\Facades\FilamentAsset::getAlpineComponentSrc('calendar-event', 'adultdate-schedule');
+    }
+}

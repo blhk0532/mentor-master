@@ -1,0 +1,15 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Livewire\Features\SupportPageComponents;
+
+use Exception;
+
+class MissingLayoutException extends Exception
+{
+    public function __construct(string $layout)
+    {
+        parent::__construct('Livewire page component layout view not found: ['.$layout.']');
+    }
+}

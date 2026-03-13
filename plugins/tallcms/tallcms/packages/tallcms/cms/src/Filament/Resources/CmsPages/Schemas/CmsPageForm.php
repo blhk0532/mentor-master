@@ -1,0 +1,350 @@
+<?php
+
+namespace TallCms\Cms\Filament\Resources\CmsPages\Schemas;
+
+use Filament\Forms\Components\DateTimePicker;
+use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\Repeater;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
+use Filament\Schemas\Components\Livewire;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Tabs;
+use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Schema;
+use Illuminate\Support\Str;
+use TallCms\Cms\Enums\ContentStatus;
+use TallCms\Cms\Filament\Forms\Components\CmsRichEditor;
+use TallCms\Cms\Livewire\RevisionHistory;
+use TallCms\Cms\Models\CmsPage;
+use TallCms\Cms\Rules\UniqueTranslatableSlug;
+use TallCms\Cms\Services\CustomBlockDiscoveryService;
+use TallCms\Cms\Services\LocaleRegistry;
+use TallCms\Cms\Services\TemplateRegistry;
+use TallCms\Cms\Services\WidgetRegistry;
+
+class CmsPageForm
+{
+    public static function configure(Schema $schema): Schema
+    {
+        return $schema
+            ->components([
+                Tabs::make('Page Management')
+                    ->tabs([
+                        Tabs\Tab::make('Content')
+                            ->icon('heroicon-o-document-text')
+                            ->schema([
+                                Section::make()
+                                    ->columns(2)
+                                    ->schema([
+                                        TextInput::make('title')
+                                            ->required(function ($livewire) {
+                                                if (! tallcms_i18n_enabled()) {
+                                                    return true;
+                                                }
+                                                // Require title for default locale when i18n enabled
+                                                $activeLocale = $livewire->activeLocale ?? app()->getLocale();
+                                                $defaultLocale = app(LocaleRegistry::class)->getDefaultLocale();
+
+                                                return $activeLocale === $defaultLocale;
+                                            })
+                                            ->maxLength(255)
+                                            ->live(onBlur: true)
+                                            ->afterStateUpdated(fn (string $state, callable $set) => $set('slug', Str::slug($state))
+                                            )
+                                            ->columnSpan(1),
+
+                                        TextInput::make('slug')
+                                            ->required(function ($livewire) {
+                                                if (! tallcms_i18n_enabled()) {
+                                                    return true;
+                                                }
+                                                // Require slug for default locale when i18n enabled
+                                                $activeLocale = $livewire->activeLocale ?? app()->getLocale();
+                                                $defaultLocale = app(LocaleRegistry::class)->getDefaultLocale();
+
+                                                return $activeLocale === $defaultLocale;
+                                            })
+                                            ->maxLength(255)
+                                            ->rules(function (?CmsPage $record, $livewire) {
+                                                $rules = ['alpha_dash'];
+
+                                                if (tallcms_i18n_enabled()) {
+                                                    // Block locale codes as slugs
+                                                    $reserved = app(LocaleRegistry::class)->getReservedSlugs();
+                                                    $rules[] = 'not_in:'.implode(',', $reserved);
+
+                                                    // Unique per locale
+                                                    $activeLocale = $livewire->activeLocale ?? app()->getLocale();
+                                                    $rules[] = new UniqueTranslatableSlug(
+                                                        table: 'tallcms_pages',
+                                                        column: 'slug',
+                                                        locale: $activeLocale,
+                                                        ignoreId: $record?->id
+                                                    );
+                                                } else {
+                                                    // Traditional unique constraint
+                                                    $rules[] = 'unique:tallcms_pages,slug'.($record ? ','.$record->id : '');
+                                                }
+
+                                                return $rules;
+                                            })
+                                            ->validationMessages([
+                                                'not_in' => 'This slug is reserved (matches a language code).',
+                                            ])
+                                            ->helperText('Used in the URL. Keep it simple and SEO-friendly.')
+                                            ->columnSpan(1),
+                                    ]),
+                                CmsRichEditor::make('content')
+                                    ->columnSpanFull()
+                                    ->fileAttachmentsDirectory('cms/attachments')
+                                    ->activePanel('customBlocks')
+                                    ->mergeTags([
+                                        'site_name',
+                                        'current_year',
+                                        'page_title',
+                                    ])
+                                    ->customBlocks(CustomBlockDiscoveryService::getBlocksArray())
+                                    ->floatingToolbars([
+                                        'paragraph' => [
+                                            'bold', 'italic', 'underline', 'strike', 'subscript', 'superscript',
+                                        ],
+                                        'heading' => [
+                                            'h1', 'h2', 'h3',
+                                        ],
+                                        'table' => [
+                                            'tableAddColumnBefore', 'tableAddColumnAfter', 'tableDeleteColumn',
+                                            'tableAddRowBefore', 'tableAddRowAfter', 'tableDeleteRow',
+                                            'tableMergeCells', 'tableSplitCell',
+                                            'tableToggleHeaderRow', 'tableToggleHeaderCell',
+                                            'tableDelete',
+                                        ],
+                                    ])
+                                    ->extraInputAttributes([
+                                        'style' => 'min-height: 40rem;',
+                                    ])
+                                    ->helperText('Create rich page content with custom blocks, merge tags, and text formatting. Use merge tags like {{site_name}} or {{current_year}}.'),
+                            ]),
+
+                        Tabs\Tab::make('Settings')
+                            ->icon('heroicon-o-cog-6-tooth')
+                            ->schema([
+                                Section::make('Page Settings')
+                                    ->columns(2)
+                                    ->schema([
+                                        Select::make('status')
+                                            ->options(function () {
+                                                // Authors can only set draft/pending, approvers can set all
+                                                if (auth()->user()?->can('Approve:CmsPage')) {
+                                                    return ContentStatus::editorOptions();
+                                                }
+
+                                                return ContentStatus::authorOptions();
+                                            })
+                                            ->required()
+                                            ->default(ContentStatus::Draft->value)
+                                            ->disabled(function (?CmsPage $record) {
+                                                // Disable status change when pending and user can't approve
+                                                if ($record?->isPending() && ! auth()->user()?->can('Approve:CmsPage')) {
+                                                    return true;
+                                                }
+
+                                                return false;
+                                            })
+                                            ->helperText(function (?CmsPage $record) {
+                                                if ($record?->wasRejected()) {
+                                                    return 'This content was rejected. Reason: '.$record->getRejectionReason();
+                                                }
+                                                if ($record?->isPending()) {
+                                                    return 'This content is pending review.';
+                                                }
+
+                                                return null;
+                                            }),
+
+                                        DateTimePicker::make('published_at')
+                                            ->label('Publish Date')
+                                            ->nullable()
+                                            ->helperText('Leave empty to publish immediately when approved, or set a future date to schedule.')
+                                            ->visible(fn () => auth()->user()?->can('Approve:CmsPage')),
+
+                                        Select::make('author_id')
+                                            ->label('Author')
+                                            ->options(function () {
+                                                $userModel = config('tallcms.plugin_mode.user_model', 'App\\Models\\User');
+
+                                                return $userModel::query()->pluck('name', 'id');
+                                            })
+                                            ->default(auth()->id())
+                                            ->nullable()
+                                            ->searchable(),
+
+                                        Toggle::make('is_homepage')
+                                            ->label('Set as Homepage')
+                                            ->helperText('Only one page can be set as homepage. This will override any existing homepage setting.')
+                                            ->columnSpan(2),
+
+                                        Select::make('parent_id')
+                                            ->label('Parent Page')
+                                            ->options(CmsPage::query()
+                                                ->whereNull('parent_id')
+                                                ->pluck('title', 'id'))
+                                            ->searchable()
+                                            ->nullable()
+                                            ->columnSpan(1),
+
+                                        TextInput::make('sort_order')
+                                            ->numeric()
+                                            ->default(0)
+                                            ->columnSpan(1),
+
+                                        Toggle::make('show_breadcrumbs')
+                                            ->label('Show Breadcrumbs')
+                                            ->default(true)
+                                            ->helperText('Display navigation breadcrumbs on this page. Homepage never shows breadcrumbs.')
+                                            ->columnSpan(2),
+
+                                        Select::make('template')
+                                            ->label('Page Template')
+                                            ->options(fn () => app(TemplateRegistry::class)->getTemplateOptions())
+                                            ->default('default')
+                                            ->live()
+                                            ->helperText(function (?string $state) {
+                                                $config = app(TemplateRegistry::class)->getTemplateConfig($state ?? 'default');
+
+                                                return $config['description'] ?? null;
+                                            })
+                                            ->columnSpan(1),
+
+                                        Select::make('content_width')
+                                            ->label('Content Width')
+                                            ->options([
+                                                'narrow' => 'Narrow (672px)',
+                                                'standard' => 'Standard (1152px)',
+                                                'wide' => 'Wide (1280px)',
+                                            ])
+                                            ->default('standard')
+                                            ->helperText('Default width for inline content. Blocks can override.')
+                                            ->columnSpan(1),
+                                    ]),
+
+                                Section::make('Sidebar Widgets')
+                                    ->description('Configure widgets for templates with sidebars. Leave empty to use template defaults.')
+                                    ->visible(function (Get $get) {
+                                        $template = $get('template') ?? 'default';
+                                        $config = app(TemplateRegistry::class)->getTemplateConfig($template);
+
+                                        return $config['has_sidebar'] ?? false;
+                                    })
+                                    ->schema([
+                                        Repeater::make('sidebar_widgets')
+                                            ->label('')
+                                            ->schema([
+                                                Select::make('widget')
+                                                    ->label('Widget')
+                                                    ->options(fn () => app(WidgetRegistry::class)->getWidgetOptions(auth()->user()))
+                                                    ->required()
+                                                    ->live()
+                                                    ->columnSpan(1),
+
+                                                TextInput::make('settings.limit')
+                                                    ->label('Limit')
+                                                    ->numeric()
+                                                    ->default(5)
+                                                    ->visible(fn (Get $get) => in_array($get('widget'), ['recent-posts']))
+                                                    ->columnSpan(1),
+
+                                                Toggle::make('settings.show_image')
+                                                    ->label('Show thumbnails')
+                                                    ->default(true)
+                                                    ->visible(fn (Get $get) => $get('widget') === 'recent-posts')
+                                                    ->columnSpan(1),
+
+                                                Toggle::make('settings.show_count')
+                                                    ->label('Show post count')
+                                                    ->default(true)
+                                                    ->visible(fn (Get $get) => $get('widget') === 'categories')
+                                                    ->columnSpan(1),
+
+                                                Select::make('settings.style')
+                                                    ->label('Display Style')
+                                                    ->options(['cloud' => 'Cloud', 'list' => 'List'])
+                                                    ->default('cloud')
+                                                    ->visible(fn (Get $get) => $get('widget') === 'tags')
+                                                    ->columnSpan(1),
+
+                                                TextInput::make('settings.max_depth')
+                                                    ->label('Max Heading Depth')
+                                                    ->numeric()
+                                                    ->default(3)
+                                                    ->minValue(2)
+                                                    ->maxValue(4)
+                                                    ->visible(fn (Get $get) => $get('widget') === 'toc')
+                                                    ->columnSpan(1),
+
+                                                Textarea::make('settings.content')
+                                                    ->label('HTML Content')
+                                                    ->rows(4)
+                                                    ->visible(fn (Get $get) => $get('widget') === 'custom-html')
+                                                    ->columnSpanFull(),
+                                            ])
+                                            ->columns(2)
+                                            ->defaultItems(0)
+                                            ->reorderable()
+                                            ->collapsible()
+                                            ->itemLabel(fn (array $state): ?string => app(WidgetRegistry::class)->getWidget($state['widget'] ?? '')['label'] ?? 'Widget')
+                                            ->columnSpanFull(),
+                                    ]),
+                            ]),
+
+                        Tabs\Tab::make('SEO')
+                            ->icon('heroicon-o-magnifying-glass')
+                            ->schema([
+                                Section::make('Search Engine Optimization')
+                                    ->description('Optimize your page for search engines and social media sharing')
+                                    ->schema([
+                                        TextInput::make('meta_title')
+                                            ->label('Meta Title')
+                                            ->maxLength(60)
+                                            ->helperText('Recommended: 50-60 characters. If empty, page title will be used.'),
+
+                                        Textarea::make('meta_description')
+                                            ->label('Meta Description')
+                                            ->maxLength(160)
+                                            ->rows(3)
+                                            ->helperText('Recommended: 150-160 characters. Brief description for search results.'),
+
+                                        FileUpload::make('featured_image')
+                                            ->label('Featured Image')
+                                            ->image()
+                                            ->directory('cms/pages/featured-images')
+                                            ->disk(\cms_media_disk())
+                                            ->visibility(\cms_media_visibility())
+                                            ->imageEditor()
+                                            ->imageEditorAspectRatios([
+                                                '16:9',
+                                                '4:3',
+                                                '1:1',
+                                                '1.91:1', // Facebook recommended
+                                                '2:1',    // Twitter header
+                                            ])
+                                            ->helperText('Used for social media sharing and page headers. Recommended: 1200x630px for best compatibility.'),
+                                    ]),
+                            ]),
+
+                        Tabs\Tab::make('Revisions')
+                            ->icon('heroicon-o-clock')
+                            ->visible(fn (?CmsPage $record) => $record !== null && auth()->user()?->can('ViewRevisions:CmsPage'))
+                            ->schema([
+                                Livewire::make(RevisionHistory::class)
+                                    ->lazy()
+                                    ->data(fn (?CmsPage $record) => ['record' => $record]),
+                            ]),
+                    ])
+                    ->persistTabInQueryString()
+                    ->columnSpanFull(),
+            ]);
+    }
+}

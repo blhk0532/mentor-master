@@ -1,0 +1,27 @@
+/* Custom CSS for left-sliding phone dialer modal */
+
+.fi-modal.fi-modal-slide-over-left > .fi-modal-window-ctn > .fi-modal-window {
+    margin-inline-start: 0;
+    margin-inline-end: auto;
+}
+
+.fi-modal.fi-modal-slide-over-left > .fi-modal-window-ctn > .fi-modal-window.fi-transition-enter-start,
+.fi-modal.fi-modal-slide-over-left > .fi-modal-window-ctn > .fi-modal-window.fi-transition-leave-end {
+    --tw-translate-x: -100%;
+    translate: var(--tw-translate-x) var(--tw-translate-y);
+}
+
+.fi-modal.fi-modal-slide-over-left > .fi-modal-window-ctn > .fi-modal-window.fi-transition-enter-end,
+.fi-modal.fi-modal-slide-over-left > .fi-modal-window-ctn > .fi-modal-window.fi-transition-leave-start {
+    --tw-translate-x: calc(var(--spacing) * 0);
+    translate: var(--tw-translate-x) var(--tw-translate-y);
+}
+
+/* RTL support for left-sliding modal */
+.fi-modal.fi-modal-slide-over-left > .fi-modal-window-ctn > .fi-modal-window.fi-transition-enter-start:where(:dir(rtl), [dir=rtl], [dir=rtl] *),
+.fi-modal.fi-modal-slide-over-left > .fi-modal-window-ctn > .fi-modal-window.fi-transition-leave-end:where(:dir(rtl), [dir=rtl], [dir=rtl] *) {
+    --tw-translate-x: 100%;
+    translate: var(--tw-translate-x) var(--tw-translate-y);
+}
+
+

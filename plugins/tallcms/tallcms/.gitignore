@@ -1,0 +1,62 @@
+*.log
+.DS_Store
+.env
+.env.backup
+.env.production
+.phpactor.json
+.phpunit.result.cache
+/.fleet
+/.idea
+/.nova
+/.phpunit.cache
+/.vscode
+/.zed
+/auth.json
+/node_modules
+/vendor
+themes/*/node_modules
+/public/hot
+/public/storage
+/storage/*.key
+/storage/pail
+# Installer lock
+installer.lock
+
+# User-created themes (keep official themes only)
+/themes/*
+!/themes/default/
+!/themes/talldaisy/
+!/themes/autumn/
+!/themes/blog/
+!/themes/candy/
+!/themes/corporate/
+!/themes/creative/
+!/themes/minimal/
+/public/themes/*
+!/public/themes/default
+!/public/themes/talldaisy
+!/public/themes/autumn
+!/public/themes/blog
+!/public/themes/candy
+!/public/themes/corporate
+!/public/themes/creative
+!/public/themes/minimal
+Homestead.json
+Homestead.yaml
+Thumbs.db
+.env.backup.*
+# Plugin zip files
+*.zip
+tallcms-*.zip
+
+# Private/premium plugins (have their own repos)
+/plugins/tallcms/pro
+/plugins/tallcms/license-proxy
+
+# Internal documentation
+daisyui.md
+
+# Scribe API documentation (generated)
+.scribe/
+resources/views/scribe/
+storage/app/private/scribe/

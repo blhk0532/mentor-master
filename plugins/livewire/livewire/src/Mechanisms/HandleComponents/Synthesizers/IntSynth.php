@@ -1,0 +1,34 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Livewire\Mechanisms\HandleComponents\Synthesizers;
+
+// This synth exists solely to capture empty strings being set to integer properties...
+class IntSynth extends Synth
+{
+    public static $key = 'int';
+
+    public static function match($target)
+    {
+        return false;
+    }
+
+    public static function matchByType($type)
+    {
+        return $type === 'int';
+    }
+
+    public static function hydrateFromType($type, $value)
+    {
+        if ($value === '' || $value === null) {
+            return null;
+        }
+
+        if ((int) $value === $value) {
+            return (int) $value;
+        }
+
+        return $value;
+    }
+}

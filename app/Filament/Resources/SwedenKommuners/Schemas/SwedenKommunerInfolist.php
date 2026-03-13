@@ -1,0 +1,48 @@
+<?php
+
+namespace App\Filament\Resources\SwedenKommuners\Schemas;
+
+use App\Models\SwedenKommuner;
+use Filament\Infolists\Components\TextEntry;
+use Filament\Schemas\Components\Group;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Schema;
+
+class SwedenKommunerInfolist
+{
+    public static function configure(Schema $schema): Schema
+    {
+        return $schema
+            ->components([
+                Group::make()
+                    ->schema([
+                        Section::make('Kommun Information')
+                            ->schema([
+                                TextEntry::make('kommun'),
+                                TextEntry::make('lan'),
+                                TextEntry::make('personer')
+                                    ->numeric()
+                                    ->placeholder('-'),
+                                TextEntry::make('foretag')
+                                    ->numeric()
+                                    ->placeholder('-'),
+                                TextEntry::make('latitude')
+                                    ->placeholder('-'),
+                                TextEntry::make('longitude'),
+                                TextEntry::make('created_at')
+                                    ->dateTime()
+                                    ->placeholder('-'),
+                                TextEntry::make('updated_at')
+                                    ->dateTime()
+                                    ->placeholder('-'),
+                                TextEntry::make('deleted_at')
+                                    ->dateTime()
+                                    ->visible(fn (SwedenKommuner $record): bool => $record->trashed()),
+                            ])
+                            ->columnSpan('full')
+                            ->columns(4),
+                    ])
+                    ->columnSpan('full'),
+            ]);
+    }
+}

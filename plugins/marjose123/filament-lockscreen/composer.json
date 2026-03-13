@@ -1,0 +1,70 @@
+{
+    "name": "marjose123/filament-lockscreen",
+    "description": "Give an ability to the user to lock their access session without logging out of the system for a break.",
+    "type": "library",
+    "keywords": [
+        "MarJose123",
+        "laravel",
+        "filament-lockscreen"
+    ],
+    "homepage": "https://github.com/marjose123/filament-lockscreen",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Marjose",
+            "email": "hypernate1@gmail.com",
+            "role": "Developer"
+        }
+    ],
+    "require": {
+        "php": "^8.2",
+        "danharrin/livewire-rate-limiting": "^2.1.0",
+        "filament/filament": "^4.0|^5.0",
+        "spatie/laravel-package-tools": "^1.13.0"
+    },
+    "require-dev": {
+        "driftingly/rector-laravel": "^2.0",
+        "laravel/pint": "^1.0",
+        "nunomaduro/collision": "^8.1",
+        "orchestra/testbench": "^9.0|^10.0",
+        "pestphp/pest": "^3.7",
+        "pestphp/pest-plugin-laravel": "^3.0",
+        "phpunit/phpunit": "^11.0|^12.0",
+        "rector/rector": "^2.1"
+    },
+    "autoload": {
+        "psr-4": {
+            "lockscreen\\FilamentLockscreen\\": "src"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "lockscreen\\FilamentLockscreen\\Tests\\": "tests"
+        }
+    },
+    "scripts": {
+        "analyse": "vendor/bin/phpstan analyse",
+        "test": "vendor/bin/pest",
+        "test-coverage": "vendor/bin/pest --coverage",
+        "format": "vendor/bin/pint",
+        "rector": "vendor/bin/rector process --ansi",
+        "rector:check": "vendor/bin/rector process --dry-run --ansi"
+    },
+    "config": {
+        "sort-packages": true,
+        "optimize-autoloader": true,
+        "preferred-install": "dist",
+        "allow-plugins": {
+            "pestphp/pest-plugin": true
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "lockscreen\\FilamentLockscreen\\FilamentLockscreenServiceProvider"
+            ]
+        }
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true
+}

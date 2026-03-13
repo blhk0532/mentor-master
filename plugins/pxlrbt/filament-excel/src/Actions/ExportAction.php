@@ -1,0 +1,45 @@
+<?php
+
+declare(strict_types=1);
+
+namespace pxlrbt\FilamentExcel\Actions;
+
+use Filament\Actions\Action;
+use pxlrbt\FilamentExcel\Actions\Concerns\ExportableAction;
+use pxlrbt\FilamentExcel\Exports\ExcelExport;
+
+class ExportAction extends Action
+{
+    use ExportableAction {
+        ExportableAction::setUp as parentSetUp;
+    }
+
+    protected function setUp(): void
+    {
+        $this->parentSetUp();
+
+        $this->defaultView(self::BUTTON_VIEW);
+        $this->icon('heroicon-o-document');
+
+        $this->exports = collect([
+            ExcelExport::make()->fromForm(),
+        ]);
+    }
+
+    public static function getDefaultName(): ?string
+    {
+        return 'export';
+    }
+
+    public function handleExport(array $data)
+    {
+        $exportable = $this->getSelectedExport($data);
+        $livewire = $this->getLivewire();
+
+        return app()->call([$exportable, 'hydrate'], [
+            'livewire' => $this->getLivewire(),
+            'records' => property_exists($livewire, 'record') ? collect([$livewire->record]) : null,
+            'formData' => data_get($data, $exportable->getName()),
+        ])->export();
+    }
+}

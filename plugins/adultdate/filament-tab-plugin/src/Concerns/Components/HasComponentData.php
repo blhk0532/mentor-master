@@ -1,0 +1,22 @@
+<?php
+
+declare(strict_types=1);
+
+namespace SolutionForest\TabLayoutPlugin\Concerns\Components;
+
+trait HasComponentData
+{
+    protected array $data = [];
+
+    public function data(array $data): static
+    {
+        $this->data = $data;
+
+        return $this;
+    }
+
+    public function getData(): array
+    {
+        return $this->data;
+    }
+}

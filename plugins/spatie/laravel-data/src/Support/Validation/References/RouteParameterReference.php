@@ -1,0 +1,43 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Spatie\LaravelData\Support\Validation\References;
+
+use Spatie\LaravelData\Exceptions\CannotResolveRouteParameterReference;
+
+use function request;
+
+class RouteParameterReference implements ExternalReference
+{
+    public function __construct(
+        public readonly string $routeParameter,
+        public readonly ?string $property = null,
+        public readonly bool $nullable = false,
+    ) {}
+
+    public function getValue(): ?string
+    {
+        $parameter = request()->route($this->routeParameter);
+
+        if ($parameter === null && $this->nullable === false) {
+            throw CannotResolveRouteParameterReference::parameterNotFound($this->routeParameter, $this->property);
+        }
+
+        if ($parameter === null) {
+            return null;
+        }
+
+        if ($this->property === null) {
+            return $parameter;
+        }
+
+        $value = data_get($parameter, $this->property);
+
+        if ($value === null) {
+            throw CannotResolveRouteParameterReference::propertyOnParameterNotFound($this->routeParameter, $this->property);
+        }
+
+        return $value;
+    }
+}
